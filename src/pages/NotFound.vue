@@ -6,10 +6,10 @@ const router = useRouter();
 
 <template>
   <div class="notfound-container">
-    <div class="frame">
+    <div class="gif">
       <p>404</p>
       <h2>看起来你迷路了</h2>
-      <div class="bottom">
+      <div class="link">
         <h5>你所寻找的页面已丢失！</h5>
         <el-button link class="back" type="primary" @click="router.back">
           返回上一页
@@ -25,7 +25,7 @@ const router = useRouter();
     height: 100%;
     box-sizing: border-box;
     background-color: #fff;
-  .frame
+  .gif
     width: 100%;
     height: 100%;
     display: flex;
@@ -42,7 +42,7 @@ const router = useRouter();
       position: absolute;
       bottom: 8rem;
       font-size: 34px;
-    .bottom
+    .link
       display: flex;
       position: absolute;
       bottom: 6rem;

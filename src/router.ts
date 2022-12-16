@@ -17,6 +17,11 @@ const routes: readonly RouteRecordRaw[] = [
     path: '/:pathMatch(.*)*',
     component: () => import('@/pages/NotFound.vue'),
   },
+  {
+    name: 'login',
+    path: '/login',
+    component: () => import('@/pages/Login.vue'),
+  },
 ];
 
 const router: Router = createRouter({
