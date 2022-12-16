@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", // es目标版本
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Node", // 如何处理模块
+    "strict": true,
+    "strictNullChecks": false,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    // "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"], // 编译过程中需要引入的库文件的列表
+    "types": ["vite/client", "element-plus/global"], // 默认所有可见的@types包会在编译过程中被引入
+    "skipLibCheck": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "*.ts": ["*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
