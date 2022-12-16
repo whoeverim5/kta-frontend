@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { ElButton, ElMessage, ElCalendar } from 'element-plus';
-
-const value = ref<Date>(new Date());
+import { ElButton, ElMessage, ElTable, ElPagination } from 'element-plus';
 
 const handleClick = () => {
   ElMessage.success('hi');
@@ -14,8 +11,7 @@ const handleClick = () => {
     <el-button type="primary" @click="handleClick">click</el-button>
   </div>
   <div>
-    <el-calendar v-model="value" />
+    <el-table mb-1 :data="[]" />
+    <el-pagination :total="100" />
   </div>
 </template>
-
-<style lang="css" scoped></style>

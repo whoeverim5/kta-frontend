@@ -8,4 +8,13 @@ import Demo from '@/components/Login/Demo.vue';
   </div>
 </template>
 
-<style lang="css" scoped></style>
+<style lang="scss" scoped>
+.login-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: baseline;
+}
+</style>

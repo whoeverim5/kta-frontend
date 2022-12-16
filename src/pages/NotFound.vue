@@ -19,37 +19,50 @@ const router = useRouter();
   </div>
 </template>
 
-<style lang="stylus" scoped>
-.notfound-container
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    background-color: #fff;
-  .gif
-    width: 100%;
-    height: 100%;
+<style lang="scss" scoped>
+.notfound-container {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  background-color: #fff;
+
+  .gif {
     display: flex;
+    width: 100%;
+    height: 100%;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     background: url('@/assets/images/404.gif') no-repeat center;
-    p
+
+    p {
       position: absolute;
       top: 3rem;
-      font-size: 7rem;
       color: #333;
-    h2
+      font-size: 7rem;
+    }
+
+    h2 {
       position: absolute;
       bottom: 8rem;
       font-size: 34px;
-    .link
-      display: flex;
+    }
+
+    .link {
       position: absolute;
+      display: flex;
       bottom: 6rem;
       flex-direction: row;
       justify-content: space-between;
-      h5
+
+      h5 {
         color: #9c9c9c;
-      .back
+      }
+
+      .back {
         font-weight: 700;
+      }
+    }
+  }
+}
 </style>

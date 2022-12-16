@@ -3,5 +3,3 @@
 <template>
   <dir class="register-container"></dir>
 </template>
-
-<style lang="css" scoped></style>
