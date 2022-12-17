@@ -22,6 +22,27 @@ const routes: readonly RouteRecordRaw[] = [
     path: '/login',
     component: () => import('@/pages/Login.vue'),
   },
+  {
+    name: 'register',
+    path: '/register',
+    component: () => import('@/pages/Register.vue'),
+  },
+  {
+    name: 'privacy',
+    path: '/privacy',
+    meta: {
+      title: '《隐私政策》',
+    },
+    component: () => import('@/pages/Privacy.vue'),
+  },
+  {
+    name: 'userPolicy',
+    path: '/user-policy',
+    meta: {
+      title: '《用户协议》',
+    },
+    component: () => import('@/pages/UserPolicy.vue'),
+  },
 ];
 
 const router: Router = createRouter({
@@ -46,7 +67,8 @@ router.beforeEach((to, from, next) => {
       next();
     } else {
       // 否则返回登录页面
-      next('/login');
+      // next('/login');
+      next('/register');
     }
   } else {
     // 如果是《用户协议》和《隐私政策》页面就修改title
