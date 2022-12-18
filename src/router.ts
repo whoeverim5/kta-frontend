@@ -67,8 +67,7 @@ router.beforeEach((to, from, next) => {
       next();
     } else {
       // 否则返回登录页面
-      // next('/login');
-      next('/register');
+      next('/login');
     }
   } else {
     // 如果是《用户协议》和《隐私政策》页面就修改title

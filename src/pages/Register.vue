@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { reactive, ref, toRaw } from 'vue';
 import {
   ElButton,
   ElIcon,
@@ -20,6 +20,8 @@ import {
 } from '@element-plus/icons-vue';
 import type { FormInstance } from 'element-plus';
 import { useRouter } from 'vue-router';
+
+import crypto from '@/utils/md5';
 
 type RegisterType = {
   account: string;
@@ -47,21 +49,25 @@ const registerInfo = reactive<RegisterType>({
 });
 const isLoading = ref<boolean>(false);
 const loginInfoFormRef = ref<FormInstance>();
+
 const validateAccount = (rule: any, value: string, callback: any): void => {
   if (!value || value === '') return callback(new Error('账号不能为空'));
   if (value.length < 8) return callback(new Error('账号长度不能小于8位'));
   return callback();
 };
+
 const validatePassword = (rule: any, value: string, callback: any) => {
   if (!value || value === '') return callback(new Error('密码不能为空'));
   return callback();
 };
+
 const validateReenteredPassword = (rule: any, value: string, callback: any) => {
   if (!value || value === '') return callback(new Error('请再输入一次密码'));
   if (registerInfo.password !== value)
     return callback(new Error('两次密码不相同'));
   return callback();
 };
+
 const validateEmail = (rule: any, value: string, callback: any) => {
   if (!value || value === '') return callback(new Error('邮箱不能为空'));
   const pattern =
@@ -69,10 +75,12 @@ const validateEmail = (rule: any, value: string, callback: any) => {
   if (!value.match(pattern)) return callback(new Error('请输入正确的邮箱格式'));
   return callback();
 };
+
 const validateCode = (rule: any, value: string, callback: any) => {
   if (!value || value === '') return callback(new Error('密码不能为空'));
   return callback();
 };
+
 const registerInfoRules = reactive<RegisterValidationType>({
   account: [{ validator: validateAccount, trigger: 'blur' }],
   password: [{ validator: validatePassword, trigger: 'blur' }],
@@ -88,7 +96,10 @@ const handleRegister = (registerInfoRef: FormInstance | undefined) => {
   registerInfoRef.validate((valid: boolean) => {
     if (valid) {
       isLoading.value = true;
-      const jsonInfo = JSON.stringify(registerInfo);
+      const rawInfo = toRaw(registerInfo);
+      rawInfo.password = crypto(rawInfo.password);
+      rawInfo.reenteredPassword = rawInfo.password;
+      const jsonInfo = JSON.stringify(rawInfo);
       setTimeout(() => {
         isLoading.value = false;
         ElMessage({
@@ -334,7 +345,7 @@ $grey: rgb(60 64 67 / 60%);
     .register {
       width: 20%;
       font-size: 22px;
-      margin: -5% 0 5%;
+      margin: 0 0 3%;
     }
   }
 }
