@@ -245,7 +245,7 @@ const handlePrivacy = () => {
 
 <style lang="scss" scoped>
 $grey: rgb(60 64 67 / 60%);
-$blue-shadow: 0 0 5px 1px rgb(237 245 255 / 100%);
+$blue-shadow: 0 0 5px 1px rgb(64 158 255 / 25%);
 
 .login-container {
   width: 100%;
