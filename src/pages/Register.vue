@@ -22,6 +22,7 @@ import type { FormInstance } from 'element-plus';
 import { useRouter } from 'vue-router';
 
 import crypto from '@/utils/md5';
+import api from '@/api';
 
 type RegisterType = {
   account: string;
@@ -39,7 +40,11 @@ type RegisterValidationType = {
 };
 
 const router = useRouter();
-const sendButtonContent = ref<string>('发送');
+const disabled = ref<boolean>(false);
+const isSending = ref<boolean>(false);
+const isLoading = ref<boolean>(false);
+const sendButtonContent = ref<string>('发 送');
+const registerInfoFormRef = ref<FormInstance>();
 const registerInfo = reactive<RegisterType>({
   account: '',
   password: '',
@@ -47,8 +52,6 @@ const registerInfo = reactive<RegisterType>({
   email: '',
   code: '',
 });
-const isLoading = ref<boolean>(false);
-const loginInfoFormRef = ref<FormInstance>();
 
 const validateAccount = (rule: any, value: string, callback: any): void => {
   if (!value || value === '') return callback(new Error('账号不能为空'));
@@ -72,7 +75,7 @@ const validateEmail = (rule: any, value: string, callback: any) => {
   if (!value || value === '') return callback(new Error('邮箱不能为空'));
   const pattern =
     /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/;
-  if (!value.match(pattern)) return callback(new Error('请输入正确的邮箱格式'));
+  if (!value.match(pattern)) return callback(new Error('请填写正确的邮箱地址'));
   return callback();
 };
 
@@ -97,20 +100,88 @@ const handleRegister = (registerInfoRef: FormInstance | undefined) => {
     if (valid) {
       isLoading.value = true;
       const rawInfo = toRaw(registerInfo);
-      rawInfo.password = crypto(rawInfo.password);
-      rawInfo.reenteredPassword = rawInfo.password;
-      const jsonInfo = JSON.stringify(rawInfo);
-      setTimeout(() => {
-        isLoading.value = false;
-        ElMessage({
-          message: '注册成功',
-          type: 'success',
+      const user = {
+        account: rawInfo.account,
+        password: crypto(rawInfo.password),
+        email: rawInfo.email,
+      };
+      const jsonInfo = JSON.stringify(user);
+      api
+        .register(jsonInfo, rawInfo.code)
+        .then(
+          () => {
+            // 注册成功
+            ElMessage({
+              message: '注册成功',
+              type: 'success',
+            });
+            // 跳转到主页
+            router.push('/login');
+          },
+          (fail) => {
+            // 网络及状态码异常
+            ElMessage({
+              message: fail.message,
+              type: 'error',
+            });
+          }
+        )
+        .finally(() => {
+          isLoading.value = false;
         });
-      }, 2000);
       return true;
     }
     ElMessage({
       message: '请填写正确的注册信息',
+      type: 'error',
+    });
+    return false;
+  });
+};
+
+const handleSendCode = (registerInfoRef: FormInstance | undefined) => {
+  registerInfoRef.validateField('email', (valid) => {
+    if (valid) {
+      let countTime: number = 60;
+      isSending.value = true;
+      sendButtonContent.value = `发 送 中（${countTime}s）`;
+      api
+        .code(registerInfo.email)
+        .then(
+          () => {
+            ElMessage({
+              message: '发送成功',
+              type: 'success',
+            });
+            const timer = setInterval(() => {
+              disabled.value = true;
+              isSending.value = false;
+              countTime -= 1;
+              sendButtonContent.value = `已 发 送（${countTime}s）`;
+            }, 1000);
+            setTimeout(() => {
+              clearInterval(timer);
+              disabled.value = false;
+              isSending.value = false;
+              sendButtonContent.value = '发 送';
+            }, countTime * 1000);
+          },
+          (fail) => {
+            ElMessage({
+              message: fail.message,
+              type: 'error',
+            });
+          }
+        )
+        .finally(() => {
+          disabled.value = false;
+          isSending.value = false;
+          sendButtonContent.value = '发 送';
+        });
+      return true;
+    }
+    ElMessage({
+      message: '请填写正确的邮件地址',
       type: 'error',
     });
     return false;
@@ -145,7 +216,7 @@ const clearValidation = (
         <h1>用 户 注 册</h1>
       </div>
       <el-form
-        ref="loginInfoFormRef"
+        ref="registerInfoFormRef"
         label-position="left"
         label-width="auto"
         size="large"
@@ -163,8 +234,8 @@ const clearValidation = (
                   size="large"
                   placeholder="请输入账号"
                   v-model="registerInfo.account"
-                  @clear="clearValidation(loginInfoFormRef, 'account')"
-                  @focus="clearValidation(loginInfoFormRef, 'account')"
+                  @clear="clearValidation(registerInfoFormRef, 'account')"
+                  @focus="clearValidation(registerInfoFormRef, 'account')"
                 >
                   <template #prefix>
                     <el-icon><User /></el-icon>
@@ -182,8 +253,8 @@ const clearValidation = (
                   size="large"
                   placeholder="请输入密码"
                   v-model="registerInfo.password"
-                  @clear="clearValidation(loginInfoFormRef, 'password')"
-                  @focus="clearValidation(loginInfoFormRef, 'password')"
+                  @clear="clearValidation(registerInfoFormRef, 'password')"
+                  @focus="clearValidation(registerInfoFormRef, 'password')"
                 >
                   <template #prefix>
                     <el-icon><Lock /></el-icon>
@@ -202,10 +273,10 @@ const clearValidation = (
                   placeholder="请再输入一次密码"
                   v-model="registerInfo.reenteredPassword"
                   @clear="
-                    clearValidation(loginInfoFormRef, 'reenteredPassword')
+                    clearValidation(registerInfoFormRef, 'reenteredPassword')
                   "
                   @focus="
-                    clearValidation(loginInfoFormRef, 'reenteredPassword')
+                    clearValidation(registerInfoFormRef, 'reenteredPassword')
                   "
                 >
                   <template #prefix>
@@ -223,8 +294,8 @@ const clearValidation = (
                   size="large"
                   placeholder="请输入邮箱"
                   v-model="registerInfo.email"
-                  @clear="clearValidation(loginInfoFormRef, 'email')"
-                  @focus="clearValidation(loginInfoFormRef, 'email')"
+                  @clear="clearValidation(registerInfoFormRef, 'email')"
+                  @focus="clearValidation(registerInfoFormRef, 'email')"
                 >
                   <template #prefix>
                     <el-icon><Message /></el-icon>
@@ -241,16 +312,22 @@ const clearValidation = (
                 class="input-code"
                 placeholder="请输入验证码"
                 v-model="registerInfo.code"
-                @clear="clearValidation(loginInfoFormRef, 'code')"
-                @focus="clearValidation(loginInfoFormRef, 'code')"
+                @clear="clearValidation(registerInfoFormRef, 'code')"
+                @focus="clearValidation(registerInfoFormRef, 'code')"
               >
                 <template #prefix>
                   <el-icon><Key /></el-icon>
                 </template>
               </el-input>
-              <el-button class="send" type="primary">
-                {{ sendButtonContent }}</el-button
+              <el-button
+                class="send"
+                type="primary"
+                :disabled="disabled"
+                :loading="isSending"
+                @click="handleSendCode(registerInfoFormRef)"
               >
+                {{ sendButtonContent }}
+              </el-button>
             </div>
           </el-form-item>
         </el-space>
@@ -261,7 +338,7 @@ const clearValidation = (
         class="register"
         type="primary"
         :loading="isLoading"
-        @click="handleRegister(loginInfoFormRef)"
+        @click="handleRegister(registerInfoFormRef)"
       >
         注 册
       </el-button>

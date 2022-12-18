@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { reactive, ref, toRaw } from 'vue';
 import {
   ElButton,
   ElIcon,
@@ -13,6 +13,8 @@ import {
 import { Lock, User } from '@element-plus/icons-vue';
 import type { FormInstance } from 'element-plus';
 import { useRouter } from 'vue-router';
+import api from '@/api';
+import crypto from '@/utils/md5';
 
 type LoginType = {
   account: string;
@@ -24,21 +26,24 @@ type LoginValidationType = {
 };
 
 const router = useRouter();
+const isLoading = ref<boolean>(false);
+const loginInfoFormRef = ref<FormInstance>();
 const loginInfo = reactive<LoginType>({
   account: '',
   password: '',
 });
-const isLoading = ref<boolean>(false);
-const loginInfoFormRef = ref<FormInstance>();
+
 const validateAccount = (rule: any, value: string, callback: any): void => {
   if (!value || value === '') return callback(new Error('账号不能为空'));
   if (value.length < 8) return callback(new Error('账号长度不能小于8位'));
   return callback();
 };
+
 const validatePassword = (rule: any, value: string, callback: any) => {
   if (!value || value === '') return callback(new Error('密码不能为空'));
   return callback();
 };
+
 const loginInfoRules = reactive<LoginValidationType>({
   account: [{ validator: validateAccount, trigger: 'blur' }],
   password: [{ validator: validatePassword, trigger: 'blur' }],
@@ -49,13 +54,32 @@ const handleLogin = (loginInfoRef: FormInstance | undefined) => {
   loginInfoRef.validate((valid: boolean) => {
     if (valid) {
       isLoading.value = true;
-      setTimeout(() => {
-        isLoading.value = false;
-        ElMessage({
-          message: '登录成功',
-          type: 'success',
+      const rawInfo = toRaw(loginInfo);
+      rawInfo.password = crypto(rawInfo.password);
+      const jsonInfo = JSON.stringify(rawInfo);
+      // 登录请求
+      api
+        .login(jsonInfo)
+        .then(
+          (success) => {
+            sessionStorage.setItem('token', success.data.token);
+            ElMessage({
+              message: '登录成功',
+              type: 'success',
+            });
+            // 跳转到主页
+            router.push('/home');
+          },
+          (fail) => {
+            ElMessage({
+              message: fail.message,
+              type: 'error',
+            });
+          }
+        )
+        .finally(() => {
+          isLoading.value = false;
         });
-      }, 2000);
       return true;
     }
     ElMessage({
