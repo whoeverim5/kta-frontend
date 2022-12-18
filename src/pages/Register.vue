@@ -106,6 +106,10 @@ const handleRegister = (registerInfoRef: FormInstance | undefined) => {
         password: crypto(registerInfo.password),
         email: registerInfo.email,
       };
+      const resp = {
+        state: false,
+        message: '',
+      };
       const jsonInfo = JSON.stringify(user);
       api
         .register(jsonInfo, registerInfo.code)
@@ -116,24 +120,40 @@ const handleRegister = (registerInfoRef: FormInstance | undefined) => {
               password: registerInfo.password,
               email: registerInfo.email,
             });
-            // 注册成功
-            ElMessage({
-              message: '注册成功',
-              type: 'success',
-            });
-            // 跳转到主页
-            router.push('/login');
+            resp.state = true;
           },
           (fail) => {
             // 网络及状态码异常
-            ElMessage({
-              message: fail.message,
-              type: 'error',
-            });
+            resp.message = fail.message;
           }
         )
         .finally(() => {
-          isLoading.value = false;
+          setTimeout(() => {
+            // 按钮状态切换
+            isLoading.value = false;
+            switch (resp.state) {
+              case true:
+                ElMessage({
+                  message: '注册成功',
+                  type: 'success',
+                });
+                // 跳转到主页
+                router.push('/login');
+                break;
+              case false:
+                ElMessage({
+                  message: resp.message,
+                  type: 'error',
+                });
+                break;
+              default:
+                ElMessage({
+                  message: '系统出错了...',
+                  type: 'error',
+                });
+                break;
+            }
+          }, 500);
         });
       return true;
     }
@@ -151,39 +171,34 @@ const handleSendCode = (registerInfoRef: FormInstance | undefined) => {
       let countTime: number = 60;
       isSending.value = true;
       sendButtonContent.value = `发 送 中（${countTime}s）`;
-      api
-        .code(registerInfo.email)
-        .then(
-          () => {
-            ElMessage({
-              message: '发送成功',
-              type: 'success',
-            });
-            const timer = setInterval(() => {
-              disabled.value = true;
-              isSending.value = false;
-              countTime -= 1;
-              sendButtonContent.value = `已 发 送（${countTime}s）`;
-            }, 1000);
-            setTimeout(() => {
-              clearInterval(timer);
-              disabled.value = false;
-              isSending.value = false;
-              sendButtonContent.value = '发 送';
-            }, countTime * 1000);
-          },
-          (fail) => {
-            ElMessage({
-              message: fail.message,
-              type: 'error',
-            });
-          }
-        )
-        .finally(() => {
+      api.code(registerInfo.email).then(
+        () => {
+          ElMessage({
+            message: '发送成功',
+            type: 'success',
+          });
+          sendButtonContent.value = `已 发 送（${countTime}s）`;
+          const timer = setInterval(() => {
+            countTime -= 1;
+            sendButtonContent.value = `已 发 送（${countTime}s）`;
+          }, 1000);
+          setTimeout(() => {
+            clearInterval(timer);
+            disabled.value = false;
+            isSending.value = false;
+            sendButtonContent.value = '发 送';
+          }, countTime * 1000);
+        },
+        (fail) => {
           disabled.value = false;
           isSending.value = false;
           sendButtonContent.value = '发 送';
-        });
+          ElMessage({
+            message: fail.message,
+            type: 'error',
+          });
+        }
+      );
       return true;
     }
     ElMessage({

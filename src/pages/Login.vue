@@ -60,6 +60,10 @@ const handleLogin = (loginInfoRef: FormInstance | undefined) => {
         account: loginInfo.account,
         password: crypto(loginInfo.password),
       };
+      const resp = {
+        state: false,
+        message: '',
+      };
       const jsonInfo = JSON.stringify(user);
       // 登录请求
       api
@@ -71,23 +75,40 @@ const handleLogin = (loginInfoRef: FormInstance | undefined) => {
               password: loginInfo.password,
               email: success.data.email,
             });
+            resp.state = true;
             sessionStorage.setItem('token', success.data.token);
-            ElMessage({
-              message: '登录成功',
-              type: 'success',
-            });
-            // 跳转到主页
-            router.push('/home');
           },
           (fail) => {
-            ElMessage({
-              message: fail.message,
-              type: 'error',
-            });
+            resp.message = fail.message;
           }
         )
         .finally(() => {
-          isLoading.value = false;
+          setTimeout(() => {
+            // 按钮状态切换
+            isLoading.value = false;
+            switch (resp.state) {
+              case true:
+                ElMessage({
+                  message: '登录成功',
+                  type: 'success',
+                });
+                // 跳转到主页
+                router.push('/home');
+                break;
+              case false:
+                ElMessage({
+                  message: resp.message,
+                  type: 'error',
+                });
+                break;
+              default:
+                ElMessage({
+                  message: '系统出错了...',
+                  type: 'error',
+                });
+                break;
+            }
+          }, 500);
         });
       return true;
     }
