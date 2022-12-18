@@ -80,7 +80,7 @@ const validateEmail = (rule: any, value: string, callback: any) => {
 };
 
 const validateCode = (rule: any, value: string, callback: any) => {
-  if (!value || value === '') return callback(new Error('密码不能为空'));
+  if (!value || value === '') return callback(new Error('验证码不能为空'));
   return callback();
 };
 
@@ -99,15 +99,14 @@ const handleRegister = (registerInfoRef: FormInstance | undefined) => {
   registerInfoRef.validate((valid: boolean) => {
     if (valid) {
       isLoading.value = true;
-      const rawInfo = toRaw(registerInfo);
       const user = {
-        account: rawInfo.account,
-        password: crypto(rawInfo.password),
-        email: rawInfo.email,
+        account: registerInfo.account,
+        password: crypto(registerInfo.password),
+        email: registerInfo.email,
       };
       const jsonInfo = JSON.stringify(user);
       api
-        .register(jsonInfo, rawInfo.code)
+        .register(jsonInfo, registerInfo.code)
         .then(
           () => {
             // 注册成功
@@ -348,6 +347,7 @@ const clearValidation = (
 
 <style lang="scss" scoped>
 $grey: rgb(60 64 67 / 60%);
+$blue-shadow: 0 0 5px 1px rgb(237 245 255 / 100%);
 
 .register-container {
   width: 100%;
@@ -360,13 +360,13 @@ $grey: rgb(60 64 67 / 60%);
   .box {
     width: 35%;
     height: 75%;
-    background-color: rgb(237 245 255 / 40%);
+    background-color: #fff;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
     border-radius: 10px;
-    box-shadow: 0 0 5px 1px rgb(0 0 0 / 10%);
+    box-shadow: $blue-shadow;
     overflow: hidden;
     position: relative;
 

@@ -54,9 +54,11 @@ const handleLogin = (loginInfoRef: FormInstance | undefined) => {
   loginInfoRef.validate((valid: boolean) => {
     if (valid) {
       isLoading.value = true;
-      const rawInfo = toRaw(loginInfo);
-      rawInfo.password = crypto(rawInfo.password);
-      const jsonInfo = JSON.stringify(rawInfo);
+      const user = {
+        account: loginInfo.account,
+        password: crypto(loginInfo.password),
+      };
+      const jsonInfo = JSON.stringify(user);
       // 登录请求
       api
         .login(jsonInfo)
@@ -138,20 +140,18 @@ const handlePrivacy = () => {
         <el-space direction="vertical" :size="24">
           <el-form-item label="账号" prop="account">
             <div class="input account">
-              <el-col :span="24">
-                <el-input
-                  clearable
-                  size="large"
-                  placeholder="请输入账号"
-                  v-model="loginInfo.account"
-                  @clear="clearValidation(loginInfoFormRef, 'account')"
-                  @focus="clearValidation(loginInfoFormRef, 'account')"
-                >
-                  <template #prefix>
-                    <el-icon><User /></el-icon>
-                  </template>
-                </el-input>
-              </el-col>
+              <el-input
+                clearable
+                size="large"
+                placeholder="请输入账号"
+                v-model="loginInfo.account"
+                @clear="clearValidation(loginInfoFormRef, 'account')"
+                @focus="clearValidation(loginInfoFormRef, 'account')"
+              >
+                <template #prefix>
+                  <el-icon><User /></el-icon>
+                </template>
+              </el-input>
             </div>
           </el-form-item>
           <el-form-item label="密码" prop="password">
@@ -217,6 +217,7 @@ const handlePrivacy = () => {
 
 <style lang="scss" scoped>
 $grey: rgb(60 64 67 / 60%);
+$blue-shadow: 0 0 5px 1px rgb(237 245 255 / 100%);
 
 .login-container {
   width: 100%;
@@ -229,13 +230,13 @@ $grey: rgb(60 64 67 / 60%);
   .box {
     width: 50%;
     height: 55%;
-    background-color: rgb(237 245 255 / 40%);
+    background-color: #fff;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
     border-radius: 10px;
-    box-shadow: 0 0 5px 1px rgb(0 0 0 / 10%);
+    box-shadow: $blue-shadow;
     overflow: hidden;
 
     .title > h1 {
@@ -285,7 +286,7 @@ $grey: rgb(60 64 67 / 60%);
     .term {
       display: flex;
       overflow: hidden;
-      font-size: 13px;
+      font-size: 12px;
       color: $grey;
     }
   }
