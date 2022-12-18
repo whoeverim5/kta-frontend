@@ -4,15 +4,10 @@ import handleResponseCodeError from './exception';
 const TIMEOUT = 1000 * 30;
 const HOST = 'http://localhost:8888';
 
-export interface ResDataType {
+export interface ResType {
   code: number;
   message: string;
   data: any;
-  error: any;
-  status: any;
-  statusText: any;
-  headers: any;
-  config: any;
 }
 
 const service = axios.create({
@@ -41,7 +36,7 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (response) => {
-    const res: ResDataType = response.data as ResDataType;
+    const res = response.data;
     const { status } = response;
     // 网络异常状态码
     if (status !== 200) return Promise.reject(res);

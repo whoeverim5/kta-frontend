@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { reactive, ref, toRaw } from 'vue';
+import { useRouter } from 'vue-router';
+import { reactive, ref } from 'vue';
 import {
   ElButton,
   ElIcon,
@@ -19,8 +20,8 @@ import {
   Key,
 } from '@element-plus/icons-vue';
 import type { FormInstance } from 'element-plus';
-import { useRouter } from 'vue-router';
 
+import useUserStore from '@/store/user';
 import crypto from '@/utils/md5';
 import api from '@/api';
 
@@ -43,6 +44,7 @@ const router = useRouter();
 const disabled = ref<boolean>(false);
 const isSending = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
+const userStore = useUserStore();
 const sendButtonContent = ref<string>('发 送');
 const registerInfoFormRef = ref<FormInstance>();
 const registerInfo = reactive<RegisterType>({
@@ -109,6 +111,11 @@ const handleRegister = (registerInfoRef: FormInstance | undefined) => {
         .register(jsonInfo, registerInfo.code)
         .then(
           () => {
+            userStore.$patch({
+              account: registerInfo.account,
+              password: registerInfo.password,
+              email: registerInfo.email,
+            });
             // 注册成功
             ElMessage({
               message: '注册成功',

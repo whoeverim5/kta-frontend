@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { reactive, ref, toRaw } from 'vue';
+import { useRouter } from 'vue-router';
+import { reactive, ref } from 'vue';
 import {
   ElButton,
   ElIcon,
   ElInput,
   ElForm,
   ElFormItem,
-  ElCol,
   ElMessage,
   ElSpace,
 } from 'element-plus';
 import { Lock, User } from '@element-plus/icons-vue';
 import type { FormInstance } from 'element-plus';
-import { useRouter } from 'vue-router';
+
 import api from '@/api';
 import crypto from '@/utils/md5';
+import useUserStore from '@/store/user';
 
 type LoginType = {
   account: string;
@@ -27,6 +28,7 @@ type LoginValidationType = {
 
 const router = useRouter();
 const isLoading = ref<boolean>(false);
+const userStore = useUserStore();
 const loginInfoFormRef = ref<FormInstance>();
 const loginInfo = reactive<LoginType>({
   account: '',
@@ -64,6 +66,11 @@ const handleLogin = (loginInfoRef: FormInstance | undefined) => {
         .login(jsonInfo)
         .then(
           (success) => {
+            userStore.$patch({
+              account: loginInfo.account,
+              password: loginInfo.password,
+              email: success.data.email,
+            });
             sessionStorage.setItem('token', success.data.token);
             ElMessage({
               message: '登录成功',
