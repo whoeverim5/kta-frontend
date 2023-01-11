@@ -13,6 +13,11 @@ const routes: readonly RouteRecordRaw[] = [
     redirect: '/home',
   },
   {
+    name: 'home',
+    path: '/home',
+    component: () => import('@/pages/Home.vue'),
+  },
+  {
     name: '404',
     path: '/:pathMatch(.*)*',
     component: () => import('@/pages/NotFound.vue'),
@@ -68,6 +73,7 @@ router.beforeEach((to, from, next) => {
     } else {
       // 否则返回登录页面
       next('/login');
+      // next();
     }
   } else {
     // 如果是《用户协议》和《隐私政策》页面就修改title

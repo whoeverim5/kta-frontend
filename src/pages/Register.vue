@@ -209,7 +209,7 @@ const handleSendCode = (registerInfoRef: FormInstance | undefined) => {
   });
 };
 
-const hanleBack = () => {
+const handleBack = () => {
   router.back();
 };
 
@@ -226,7 +226,7 @@ const clearValidation = (
   <div class="register-container">
     <div class="box">
       <div class="back">
-        <el-button link class="back-link" type="primary" @click="hanleBack">
+        <el-button link class="back-link" type="primary" @click="handleBack">
           <el-icon style="vertical-align: middle">
             <ArrowLeft />
           </el-icon>
@@ -430,11 +430,11 @@ $blue-shadow: 0 0 5px 1px rgb(64 158 255 / 25%);
         flex-direction: row;
         justify-content: space-between;
 
-        & .input-code {
+        .input-code {
           width: 280px;
         }
 
-        & .send {
+        .send {
           flex-grow: 1;
           font-size: 16px;
         }
